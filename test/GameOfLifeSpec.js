@@ -12,35 +12,48 @@ describe("Jasmine Test Runner", function() {
       // any startup code goes here
     });
 
-    it("returns a board when handed a board", function() {
-    	expect(nextGeneration([[]]) instanceof Array).toBeTruthy();
-    });
-    
-    it("throws an exception when not handed a board", function() {
-    	expect(nextGeneration).toThrow("Argument is not a board");
-    });
-    
-    it("throws an exception when handed a board that is an array", function() {
-    	expect(function() {
-    		nextGeneration({});
-    	}).toThrow("Argument is not a board");
-    });
-    
-    it("throws an excpetion when handed a board that is not a 2 dimensional array", function() {
-    	expect(function() {
-    		nextGeneration([{}]);
-    	}).toThrow("Argument is not a board");
-    });
-    
     it("has a board", function() {
     	expect(board).toBeDefined();
     });
     
     describe("board", function() {
-    	it("it initializes with an empty board", function() {
-    		board.initialize(1, 1);
+    	
+    	beforeEach(function() {
+    		board.initialize(1,1);
+    	})
+    	
+    	it("initializes with an empty board", function() {
     		expect(board.status(0, 0)).toBeFalsy();
         });
+    	
+    	it("has a cell that can be set to true", function() {
+    		board.makeAlive(0, 0);
+    		expect(board.status(0, 0)).toBeTruthy();
+    	});
+    	
+    	it("has a cell that can be killed", function() {
+    		board.makeAlive(0, 0);
+    		board.makeDead(0, 0);
+    		expect(board.status(0, 0)).toBeFalsy();    		
+    	});
+    	
+    	it("has a height and width", function(){
+    		board.initialize(2, 3);
+    		expect(board.width()).toEqual(2);
+    		expect(board.height()).toEqual(3);
+    	});
+    	
+    	describe("Cell", function() {
+        
+    		it("dies when it has no neighbors", function() {
+    			board.initialize(3, 3);
+        		board.makeAlive(1, 1);
+        		board.nextGeneration();
+        		expect(board.status(1, 1)).toBeFalsy();
+        	});
+
+    	});
+    	
     });
     
   });
