@@ -1,42 +1,10 @@
 var board = (function() {
-	var cells;
-	var countNeighbors = function(row, col) {
 
-		var neighbors = 0;
-		var m, n;
-		
-		var thisIsMe = function() {
-			return (m == row) && (n == col);
-		};
-		
-		var thisIsOutOfBounds = function() {
-			return (m < 0) || (n < 0) || (m >= board.rows()) || (n >= board.columns()); 
-		};
-		
-		for (m = row - 1; m <= row + 1; m++) {
-			for (n = col - 1; n <= col + 1; n++) {
-				if(thisIsMe() || thisIsOutOfBounds()) {
-					continue;
-				}
-				
-				if(cells[m][n] == true) {
-					neighbors++;
-				}
-			}
-		}
-		
-		return neighbors;
-	}
-	var initializeBoard = function(rows, columns) {
-		var theBoard = [];
-		for(var i = 0; i < rows; i++) {
-			theBoard[i] = new Array(columns);
-		}
-		return theBoard;
-	}
-	return {
+	var cells;
+	
+	var board = {
 		initialize : function(rows, columns) {
-			cells = initializeBoard(rows, columns);
+			cells = initializeCells(rows, columns);
 		},
 		rows : function() {
 			return cells.length;
@@ -55,30 +23,78 @@ var board = (function() {
 		}, 
 		printBoard : function() {
 			var s = "";
-			for (var row = 0; row < this.rows(); row++) {
-				for (var col = 0; col < this.columns(); col++) {
-					s+= this.status(row, col) ? "x" : "o"; 
+			traverseCells(
+				function(row, col) {
+					s += board.status(row, col) ? "x" : "o"; 				
+				}, 
+				function(row) {
+					s += "\n";
 				}
-				s+= "\n";
-			}
-			
+			);
 			return s;
 		},
 		nextGeneration : function() {
-			nextState = initializeBoard(this.rows(), this.columns());
+			nextCells = initializeCells(this.rows(), this.columns());
 
 			for (var row = 0; row < this.rows(); row++) {
 				for (var col = 0; col < this.columns(); col++) {
 					var neighbors = countNeighbors(row, col);
 					if (neighbors == 2){
-						nextState[row][col] = cells[row][col];
+						nextCells[row][col] = cells[row][col];
 					} else if(neighbors == 3) {
-						nextState[row][col] = true;
+						nextCells[row][col] = true;
 					}
 					
 				}
 			}
-			cells = nextState;
+			cells = nextCells;
 		}
 	};
+	
+	var traverseCells = function(rowColFunc, rowFunc) {
+		for (var row = 0; row < board.rows(); row++) {
+			for (var col = 0; col < board.columns(); col++) {
+				rowColFunc(row, col);
+			}
+			if (rowFunc) {
+				rowFunc(row);
+			}
+		}
+	};
+	
+	var countNeighbors = function(row, col) {
+
+		var m, n, neighbors = 0;
+		
+		var thisIsMe = function() {
+			return (m == row) && (n == col);
+		};
+		
+		var thisIsOutOfBounds = function() {
+			return (m < 0) || (n < 0) || (m >= board.rows()) || (n >= board.columns()); 
+		};
+		
+		for (m = row - 1; m <= row + 1; m++) {
+			for (n = col - 1; n <= col + 1; n++) {
+				if(thisIsMe() || thisIsOutOfBounds()) {
+					continue;
+				}
+				
+				if(board.status(m, n) == true) {
+					neighbors++;
+				}
+			}
+		}
+		
+		return neighbors;
+	}
+	var initializeCells = function(rows, columns) {
+		var cells = [];
+		for(var i = 0; i < rows; i++) {
+			cells[i] = new Array(columns);
+		}
+		return cells;
+	}
+	
+	return board;
 })();
