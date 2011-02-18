@@ -73,17 +73,16 @@ var board = (function() {
 			return (m < 0) || (n < 0) || (m >= board.rows()) || (n >= board.columns()); 
 		};
 		
-		for (m = row - 1; m <= row + 1; m++) {
-			for (n = col - 1; n <= col + 1; n++) {
-				if(thisIsMe() || thisIsOutOfBounds()) {
-					continue;
-				}
-				
-				if(board.status(m, n) == true) {
-					neighbors++;
-				}
-			}
-		}
+		var traverseNeighbors = function(func) {
+			for (m = row - 1; m <= row + 1; m++)
+				for (n = col - 1; n <= col + 1; n++)
+					func(m, n);
+		};
+		
+		traverseNeighbors(function(row, col) {
+			if (thisIsMe() || thisIsOutOfBounds()) return;
+			if (board.status(row, col)) neighbors++;
+		});
 		
 		return neighbors;
 	}
