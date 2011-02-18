@@ -1,6 +1,6 @@
 var board = (function() {
 
-	var cells;
+	var cells, nextCells;
 	
 	var board = {
 		initialize : function(rows, columns) {
@@ -24,43 +24,42 @@ var board = (function() {
 		printBoard : function() {
 			var s = "";
 			traverseCells(
-				function(row, col) {
-					s += board.status(row, col) ? "x" : "o"; 				
-				}, 
-				function(row) {
-					s += "\n";
-				}
-			);
+				function(row, col) { s += board.status(row, col) ? "x" : "o"; }, 
+				function(row) { s += "\n"; });
 			return s;
 		},
 		nextGeneration : function() {
 			nextCells = initializeCells(this.rows(), this.columns());
-
-			for (var row = 0; row < this.rows(); row++) {
-				for (var col = 0; col < this.columns(); col++) {
-					var neighbors = countNeighbors(row, col);
-					if (neighbors == 2){
-						nextCells[row][col] = cells[row][col];
-					} else if(neighbors == 3) {
-						nextCells[row][col] = true;
-					}
-					
-				}
-			}
+			traverseCells(processCell);
 			cells = nextCells;
 		}
 	};
+	
+	var initializeCells = function(rows, columns) {
+		var cells = [];
+		for(var i = 0; i < rows; i++) {
+			cells[i] = new Array(columns);
+		}
+		return cells;
+	}
 	
 	var traverseCells = function(rowColFunc, rowFunc) {
 		for (var row = 0; row < board.rows(); row++) {
 			for (var col = 0; col < board.columns(); col++) {
 				rowColFunc(row, col);
 			}
-			if (rowFunc) {
-				rowFunc(row);
-			}
+			if (rowFunc) rowFunc(row);
 		}
 	};
+	
+	var processCell = function(row, col) {
+		var neighbors = countNeighbors(row, col);
+		if (neighbors == 2) {
+			nextCells[row][col] = board.status(row, col);
+		} else if (neighbors == 3) {
+			nextCells[row][col] = true;
+		}		
+	}
 	
 	var countNeighbors = function(row, col) {
 
@@ -88,13 +87,7 @@ var board = (function() {
 		
 		return neighbors;
 	}
-	var initializeCells = function(rows, columns) {
-		var cells = [];
-		for(var i = 0; i < rows; i++) {
-			cells[i] = new Array(columns);
-		}
-		return cells;
-	}
 	
 	return board;
+	
 })();
